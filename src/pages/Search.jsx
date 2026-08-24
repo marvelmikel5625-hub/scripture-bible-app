@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search as SearchIcon, X, Clock, ArrowRight } from 'lucide-react';
 import { BOOKS } from '../data/books';
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from '../utils/storage';
-import kjv from 'kjv-bible';
+import kjv from 'bible-kjv';
 
 // Map book IDs to names
 const bookNameMap = {
