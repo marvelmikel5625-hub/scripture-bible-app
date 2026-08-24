@@ -1,4 +1,4 @@
-const STORAGE_KEYS = {
+var STORAGE_KEYS = {
   BOOKMARKS: 'scripture_bookmarks',
   NOTES: 'scripture_notes',
   READING_PROGRESS: 'scripture_reading_progress',
@@ -6,9 +6,10 @@ const STORAGE_KEYS = {
   RECENT_SEARCHES: 'scripture_recent_searches',
 };
 
-export function getItem(key, def = null) {
+export function getItem(key, def) {
+  if (def === undefined) def = null;
   try {
-    const v = localStorage.getItem(key);
+    var v = localStorage.getItem(key);
     return v ? JSON.parse(v) : def;
   } catch {
     return def;
@@ -27,23 +28,48 @@ export function getBookmarks() {
 }
 
 export function addBookmark(bm) {
-  const b = getBookmarks();
-  if (!b.some(x => x.bookId === bm.bookId && x.chapter === bm.chapter && x.verse === bm.verse)) {
-    b.push({ ...bm, createdAt: new Date().toISOString() });
+  var b = getBookmarks();
+  var exists = false;
+  for (var i = 0; i < b.length; i++) {
+    if (b[i].bookId === bm.bookId && b[i].chapter === bm.chapter && b[i].verse === bm.verse) {
+      exists = true;
+      break;
+    }
+  }
+  if (!exists) {
+    b.push({ 
+      bookId: bm.bookId, 
+      bookName: bm.bookName, 
+      chapter: bm.chapter, 
+      verse: bm.verse, 
+      text: bm.text,
+      createdAt: new Date().toISOString() 
+    });
     setItem(STORAGE_KEYS.BOOKMARKS, b);
   }
   return b;
 }
 
 export function removeBookmark(bookId, chapter, verse) {
-  let b = getBookmarks();
-  b = b.filter(x => !(x.bookId === bookId && x.chapter === chapter && x.verse === verse));
-  setItem(STORAGE_KEYS.BOOKMARKS, b);
-  return b;
+  var b = getBookmarks();
+  var newB = [];
+  for (var i = 0; i < b.length; i++) {
+    if (!(b[i].bookId === bookId && b[i].chapter === chapter && b[i].verse === verse)) {
+      newB.push(b[i]);
+    }
+  }
+  setItem(STORAGE_KEYS.BOOKMARKS, newB);
+  return newB;
 }
 
 export function isBookmarked(bookId, chapter, verse) {
-  return getBookmarks().some(x => x.bookId === bookId && x.chapter === chapter && x.verse === verse);
+  var b = getBookmarks();
+  for (var i = 0; i < b.length; i++) {
+    if (b[i].bookId === bookId && b[i].chapter === chapter && b[i].verse === verse) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Notes
@@ -52,23 +78,42 @@ export function getNotes() {
 }
 
 export function addNote(note) {
-  const n = getNotes();
-  const newNote = { ...note, id: Date.now().toString(), createdAt: new Date().toISOString() };
+  var n = getNotes();
+  var newNote = { 
+    bookId: note.bookId, 
+    bookName: note.bookName, 
+    chapter: note.chapter, 
+    verse: note.verse, 
+    text: note.text,
+    content: note.content,
+    id: Date.now().toString(), 
+    createdAt: new Date().toISOString() 
+  };
   n.push(newNote);
   setItem(STORAGE_KEYS.NOTES, n);
   return n;
 }
 
 export function deleteNote(id) {
-  let n = getNotes();
-  n = n.filter(x => x.id !== id);
-  setItem(STORAGE_KEYS.NOTES, n);
-  return n;
+  var n = getNotes();
+  var newN = [];
+  for (var i = 0; i < n.length; i++) {
+    if (n[i].id !== id) {
+      newN.push(n[i]);
+    }
+  }
+  setItem(STORAGE_KEYS.NOTES, newN);
+  return newN;
 }
 
 export function updateNote(id, content) {
-  let n = getNotes();
-  n = n.map(x => x.id === id ? { ...x, content, updatedAt: new Date().toISOString() } : x);
+  var n = getNotes();
+  for (var i = 0; i < n.length; i++) {
+    if (n[i].id === id) {
+      n[i].content = content;
+      n[i].updatedAt = new Date().toISOString();
+    }
+  }
   setItem(STORAGE_KEYS.NOTES, n);
   return n;
 }
@@ -79,7 +124,7 @@ export function getReadingProgress() {
 }
 
 export function saveReadingProgress(bookId, chapter) {
-  const p = { bookId, chapter, timestamp: new Date().toISOString() };
+  var p = { bookId: bookId, chapter: chapter, timestamp: new Date().toISOString() };
   setItem(STORAGE_KEYS.READING_PROGRESS, p);
   return p;
 }
@@ -105,12 +150,17 @@ export function getRecentSearches() {
 }
 
 export function addRecentSearch(q) {
-  let s = getRecentSearches();
-  s = s.filter(x => x.toLowerCase() !== q.toLowerCase());
-  s.unshift(q);
-  if (s.length > 10) s = s.slice(0, 10);
-  setItem(STORAGE_KEYS.RECENT_SEARCHES, s);
-  return s;
+  var s = getRecentSearches();
+  var newS = [];
+  for (var i = 0; i < s.length; i++) {
+    if (s[i].toLowerCase() !== q.toLowerCase()) {
+      newS.push(s[i]);
+    }
+  }
+  newS.unshift(q);
+  if (newS.length > 10) newS = newS.slice(0, 10);
+  setItem(STORAGE_KEYS.RECENT_SEARCHES, newS);
+  return newS;
 }
 
 export function clearRecentSearches() {
