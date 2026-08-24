@@ -1,4 +1,5 @@
-import kjv from 'kjv-bible';
+// src/data/bibleLoader.js
+import kjv from 'bible-kjv';
 
 // Cache loaded chapters for performance
 const chapterCache = new Map();
