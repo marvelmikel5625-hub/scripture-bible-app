@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect } useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, ChevronRight, Bookmark, StickyNote, Copy, Share2, X, BookOpen,
   Shuffle, Volume2, VolumeX, RotateCcw
