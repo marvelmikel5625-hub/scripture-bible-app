@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 35 30% 98%;
+    --foreground: 20 14% 15%;
+    --card: 35 30% 99%;
+    --card-foreground: 20 14% 15%;
+    --border: 30 20% 90%;
+    --muted: 30 15% 92%;
+    --muted-foreground: 25 12% 45%;
+  }
+
+  .dark {
+    --background: 240 15% 12%;
+    --foreground: 40 20% 90%;
+    --card: 240 15% 16%;
+    --card-foreground: 40 20% 90%;
+    --border: 240 12% 25%;
+    --muted: 240 12% 20%;
+    --muted-foreground: 40 10% 60%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .bg-card {
+    background-color: hsl(var(--card));
+  }
+  .bg-muted {
+    background-color: hsl(var(--muted));
+  }
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d4a88c;
+    border-radius: 9999px;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #6a5a4a;
+  }
+
+  .verse-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  .dark .verse-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin {
+    animation: spin 0.8s linear infinite;
+  }
+}
