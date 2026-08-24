@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import { Search as SearchIcon, X, Clock, ArrowRight } from 'lucide-react';
 import { BOOKS } from '../data/books';
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from '../utils/storage';
-import kjv from 'bible-kjv';
+import * as bibleKJV from 'bible-kjv';
+
+// Normalize import shape: package may export default or named
+const kjv = (bibleKJV && (bibleKJV.default || bibleKJV)) || {};
 
 // Map book IDs to names
 const bookNameMap = {
@@ -116,7 +119,7 @@ export default function Search() {
 
   const highlightText = (text, query) => {
     if (!query.trim()) return text;
-    const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'gi'));
     return parts.map((part, i) => 
       part.toLowerCase() === query.toLowerCase() ? 
         <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 px-0.5 rounded">{part}</span> : 
