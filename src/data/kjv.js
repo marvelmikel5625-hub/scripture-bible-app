@@ -1,33 +1,30 @@
-// src/data/kjv.js
-// This is a minimal KJV dataset. For a complete one, you'd need the full data.
-// You can download the full KJV JSON from: https://github.com/thiagobodruk/bible
-
-export const kjv = {
-  Genesis: {
+// src/data/kjv-data.js
+export var kjvData = {
+  'Genesis': {
     1: {
       1: 'In the beginning God created the heaven and the earth.',
       2: 'And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.',
       3: 'And God said, Let there be light: and there was light.',
       4: 'And God saw the light, that it was good: and God divided the light from the darkness.',
-      5: 'And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.',
+      5: 'And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.'
     },
     2: {
       1: 'Thus the heavens and the earth were finished, and all the host of them.',
       2: 'And on the seventh day God ended his work which he had made; and he rested on the seventh day from all his work which he had made.',
-    },
-    // ... continue with all chapters
+      3: 'And God blessed the seventh day, and sanctified it: because that in it he had rested from all his work which God created and made.'
+    }
   },
-  Psalms: {
+  'Psalms': {
     23: {
       1: 'The LORD is my shepherd; I shall not want.',
       2: 'He maketh me to lie down in green pastures: he leadeth me beside the still waters.',
       3: 'He restoreth my soul: he leadeth me in the paths of righteousness for his name\'s sake.',
       4: 'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.',
       5: 'Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.',
-      6: 'Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.',
-    },
+      6: 'Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.'
+    }
   },
-  John: {
+  'John': {
     3: {
       1: 'There was a man of the Pharisees, named Nicodemus, a ruler of the Jews:',
       2: 'The same came to Jesus by night, and said unto him, Rabbi, we know that thou art a teacher come from God: for no man can do these miracles that thou doest, except God be with him.',
@@ -49,10 +46,9 @@ export const kjv = {
       18: 'He that believeth on him is not condemned: but he that believeth not is condemned already, because he hath not believed in the name of the only begotten Son of God.',
       19: 'And this is the condemnation, that light is come into the world, and men loved darkness rather than light, because their deeds were evil.',
       20: 'For every one that doeth evil hateth the light, neither cometh to the light, lest his deeds should be reproved.',
-      21: 'But he that doeth truth cometh to the light, that his deeds may be made manifest, that they are wrought in God.',
-    },
-  },
-  // Add more books as needed
+      21: 'But he that doeth truth cometh to the light, that his deeds may be made manifest, that they are wrought in God.'
+    }
+  }
 };
 
-export default kjv;
+export default kjvData;
