@@ -43,19 +43,23 @@ export default function Search() {
     
     // Build complete verse index
     const verses = [];
-    Object.entries(kjv).forEach(([bookName, book]) => {
-      Object.entries(book).forEach(([chapter, chapterData]) => {
-        Object.entries(chapterData).forEach(([verse, text]) => {
-          verses.push({
-            bookName,
-            chapter: parseInt(chapter),
-            verse: parseInt(verse),
-            text,
-            bookId: bookIdMap[bookName] || 0
+    try {
+      Object.entries(kjv).forEach(([bookName, book]) => {
+        Object.entries(book).forEach(([chapter, chapterData]) => {
+          Object.entries(chapterData).forEach(([verse, text]) => {
+            verses.push({
+              bookName,
+              chapter: parseInt(chapter),
+              verse: parseInt(verse),
+              text,
+              bookId: bookIdMap[bookName] || 0
+            });
           });
         });
       });
-    });
+    } catch (error) {
+      console.error('Error loading KJV data:', error);
+    }
     setAllVerses(verses);
   }, []);
 
