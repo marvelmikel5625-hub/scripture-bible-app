@@ -1,0 +1,11 @@
+// src/data/bibleLoader.js
+export async function loadKJV() {
+  try {
+    const response = await fetch('/kjv-full.json');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to load KJV data:', error);
+    return null;
+  }
+}
