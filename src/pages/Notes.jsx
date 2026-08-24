@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { StickyNote, Trash2, Edit2, ArrowRight, Calendar, X } from 'lucide-react';
+import { StickyNote, Trash2, Edit2, ArrowRight, Calendar } from 'lucide-react';
 import { getNotes, deleteNote, updateNote } from '../utils/storage';
 
 export default function Notes() {
@@ -8,27 +8,27 @@ export default function Notes() {
   const [editing, setEditing] = useState(null);
   const [editContent, setEditContent] = useState('');
 
-  useEffect(() => {
+  useEffect(function() {
     setNotes(getNotes());
   }, []);
 
-  const handleDelete = (id) => {
+  const handleDelete = function(id) {
     setNotes(deleteNote(id));
   };
 
-  const handleEdit = (note) => {
+  const handleEdit = function(note) {
     setEditing(note);
     setEditContent(note.content);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = function() {
     if (!editing || !editContent.trim()) return;
     setNotes(updateNote(editing.id, editContent.trim()));
     setEditing(null);
     setEditContent('');
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = function(dateString) {
     return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
@@ -67,74 +67,76 @@ export default function Notes() {
       </div>
       
       <div className="space-y-4">
-        {notes.map((note) => (
-          <div key={note.id} className="bg-card rounded-xl border border-border p-4 hover:border-primary-300 transition-all">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center flex-wrap gap-2 text-sm mb-1">
-                  <Link to={`/bible/${note.bookId}/${note.chapter}`} className="font-medium hover:text-primary-600 transition-colors">
-                    {note.bookName}
-                  </Link>
-                  <span className="text-muted-foreground">{note.chapter}:{note.verse}</span>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Calendar size={12} />
-                    {formatDate(note.createdAt)}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">"{note.text}"</p>
-                
-                {editing?.id === note.id ? (
-                  <div className="mt-2">
-                    <textarea 
-                      value={editContent} 
-                      onChange={(e) => setEditContent(e.target.value)} 
-                      className="w-full p-3 rounded-lg border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20" 
-                      rows={3} 
-                    />
-                    <div className="flex items-center gap-2 mt-2">
-                      <button 
-                        onClick={handleSaveEdit} 
-                        className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm"
-                      >
-                        Save
-                      </button>
-                      <button 
-                        onClick={() => setEditing(null)} 
-                        className="px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+        {notes.map(function(note) {
+          return (
+            <div key={note.id} className="bg-card rounded-xl border border-border p-4 hover:border-primary-300 transition-all">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center flex-wrap gap-2 text-sm mb-1">
+                    <Link to={'/bible/' + note.bookId + '/' + note.chapter} className="font-medium hover:text-primary-600 transition-colors">
+                      {note.bookName}
+                    </Link>
+                    <span className="text-muted-foreground">{note.chapter}:{note.verse}</span>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar size={12} />
+                      {formatDate(note.createdAt)}
+                    </span>
                   </div>
-                ) : (
-                  <p className="font-serif leading-relaxed">{note.content}</p>
-                )}
+                  <p className="text-sm text-muted-foreground mb-2">"{note.text}"</p>
+                  
+                  {editing && editing.id === note.id ? (
+                    <div className="mt-2">
+                      <textarea 
+                        value={editContent} 
+                        onChange={function(e) { setEditContent(e.target.value); }} 
+                        className="w-full p-3 rounded-lg border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20" 
+                        rows={3} 
+                      />
+                      <div className="flex items-center gap-2 mt-2">
+                        <button 
+                          onClick={handleSaveEdit} 
+                          className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-sm"
+                        >
+                          Save
+                        </button>
+                        <button 
+                          onClick={function() { setEditing(null); }} 
+                          className="px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="font-serif leading-relaxed">{note.content}</p>
+                  )}
+                </div>
               </div>
+              
+              {(!editing || editing.id !== note.id) && (
+                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border">
+                  <Link to={'/bible/' + note.bookId + '/' + note.chapter} className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm">
+                    Open <ArrowRight size={14} />
+                  </Link>
+                  <button 
+                    onClick={function() { handleEdit(note); }} 
+                    className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                    aria-label="Edit note"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                  <button 
+                    onClick={function() { handleDelete(note.id); }} 
+                    className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors ml-auto"
+                    aria-label="Delete note"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              )}
             </div>
-            
-            {editing?.id !== note.id && (
-              <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border">
-                <Link to={`/bible/${note.bookId}/${note.chapter}`} className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm">
-                  Open <ArrowRight size={14} />
-                </Link>
-                <button 
-                  onClick={() => handleEdit(note)} 
-                  className="p-1.5 rounded-lg hover:bg-muted transition-colors"
-                  aria-label="Edit note"
-                >
-                  <Edit2 size={16} />
-                </button>
-                <button 
-                  onClick={() => handleDelete(note.id)} 
-                  className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors ml-auto"
-                  aria-label="Delete note"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
