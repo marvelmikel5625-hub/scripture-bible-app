@@ -6,25 +6,27 @@ import { getBookmarks, removeBookmark } from '../utils/storage';
 export default function Bookmarks() {
   const [bookmarks, setBookmarks] = useState([]);
 
-  useEffect(() => {
+  useEffect(function() {
     setBookmarks(getBookmarks());
   }, []);
 
-  const handleRemove = (bookId, chapter, verse) => {
+  const handleRemove = function(bookId, chapter, verse) {
     setBookmarks(removeBookmark(bookId, chapter, verse));
   };
 
-  const handleCopy = (text) => navigator.clipboard.writeText(text);
+  const handleCopy = function(text) {
+    navigator.clipboard.writeText(text);
+  };
   
-  const handleShare = async (text) => {
+  const handleShare = async function(text) {
     try { 
-      await navigator.share({ text }); 
+      await navigator.share({ text: text }); 
     } catch { 
       handleCopy(text); 
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = function(dateString) {
     return new Date(dateString).toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric', 
@@ -61,15 +63,15 @@ export default function Bookmarks() {
       </div>
       
       <div className="space-y-3">
-        {bookmarks.map((bm, index) => {
-          const shareText = `${bm.text} — ${bm.bookName} ${bm.chapter}:${bm.verse} (KJV)`;
+        {bookmarks.map(function(bm, index) {
+          const shareText = bm.text + ' — ' + bm.bookName + ' ' + bm.chapter + ':' + bm.verse + ' (KJV)';
           
           return (
             <div key={index} className="bg-card rounded-xl border border-border p-4 hover:border-primary-300 transition-all group">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center flex-wrap gap-2 text-sm mb-1">
-                    <Link to={`/bible/${bm.bookId}/${bm.chapter}`} className="font-medium hover:text-primary-600 transition-colors">
+                    <Link to={'/bible/' + bm.bookId + '/' + bm.chapter} className="font-medium hover:text-primary-600 transition-colors">
                       {bm.bookName}
                     </Link>
                     <span className="text-muted-foreground">{bm.chapter}:{bm.verse}</span>
@@ -83,25 +85,25 @@ export default function Bookmarks() {
               </div>
               
               <div className="flex items-center gap-1 mt-3 pt-3 border-t border-border">
-                <Link to={`/bible/${bm.bookId}/${bm.chapter}`} className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm">
+                <Link to={'/bible/' + bm.bookId + '/' + bm.chapter} className="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-sm">
                   Open <ArrowRight size={14} />
                 </Link>
                 <button 
-                  onClick={() => handleCopy(shareText)} 
+                  onClick={function() { handleCopy(shareText); }} 
                   className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                   aria-label="Copy"
                 >
                   <Copy size={16} />
                 </button>
                 <button 
-                  onClick={() => handleShare(shareText)} 
+                  onClick={function() { handleShare(shareText); }} 
                   className="p-1.5 rounded-lg hover:bg-muted transition-colors"
                   aria-label="Share"
                 >
                   <Share2 size={16} />
                 </button>
                 <button 
-                  onClick={() => handleRemove(bm.bookId, bm.chapter, bm.verse)} 
+                  onClick={function() { handleRemove(bm.bookId, bm.chapter, bm.verse); }} 
                   className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors ml-auto"
                   aria-label="Remove bookmark"
                 >
