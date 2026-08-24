@@ -1,168 +1,112 @@
-var STORAGE_KEYS = {
-  BOOKMARKS: 'scripture_bookmarks',
-  NOTES: 'scripture_notes',
-  READING_PROGRESS: 'scripture_reading_progress',
-  SETTINGS: 'scripture_settings',
-  RECENT_SEARCHES: 'scripture_recent_searches',
-};
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Search as SearchIcon, X } from 'lucide-react';
+import { BOOKS } from '../../data/books';
 
-export function getItem(key, def) {
-  if (def === undefined) def = null;
-  try {
-    var v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : def;
-  } catch {
-    return def;
-  }
-}
+export default function BookSelector({ currentBookId, onClose }) {
+  var [searchQuery, setSearchQuery] = useState('');
+  var [testament, setTestament] = useState('all');
 
-export function setItem(key, v) {
-  try {
-    localStorage.setItem(key, JSON.stringify(v));
-  } catch {}
-}
-
-// Bookmarks
-export function getBookmarks() {
-  return getItem(STORAGE_KEYS.BOOKMARKS, []);
-}
-
-export function addBookmark(bm) {
-  var b = getBookmarks();
-  var exists = false;
-  for (var i = 0; i < b.length; i++) {
-    if (b[i].bookId === bm.bookId && b[i].chapter === bm.chapter && b[i].verse === bm.verse) {
-      exists = true;
-      break;
-    }
-  }
-  if (!exists) {
-    b.push({ 
-      bookId: bm.bookId, 
-      bookName: bm.bookName, 
-      chapter: bm.chapter, 
-      verse: bm.verse, 
-      text: bm.text,
-      createdAt: new Date().toISOString() 
-    });
-    setItem(STORAGE_KEYS.BOOKMARKS, b);
-  }
-  return b;
-}
-
-export function removeBookmark(bookId, chapter, verse) {
-  var b = getBookmarks();
-  var newB = [];
-  for (var i = 0; i < b.length; i++) {
-    if (!(b[i].bookId === bookId && b[i].chapter === chapter && b[i].verse === verse)) {
-      newB.push(b[i]);
-    }
-  }
-  setItem(STORAGE_KEYS.BOOKMARKS, newB);
-  return newB;
-}
-
-export function isBookmarked(bookId, chapter, verse) {
-  var b = getBookmarks();
-  for (var i = 0; i < b.length; i++) {
-    if (b[i].bookId === bookId && b[i].chapter === chapter && b[i].verse === verse) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// Notes
-export function getNotes() {
-  return getItem(STORAGE_KEYS.NOTES, []);
-}
-
-export function addNote(note) {
-  var n = getNotes();
-  var newNote = { 
-    bookId: note.bookId, 
-    bookName: note.bookName, 
-    chapter: note.chapter, 
-    verse: note.verse, 
-    text: note.text,
-    content: note.content,
-    id: Date.now().toString(), 
-    createdAt: new Date().toISOString() 
-  };
-  n.push(newNote);
-  setItem(STORAGE_KEYS.NOTES, n);
-  return n;
-}
-
-export function deleteNote(id) {
-  var n = getNotes();
-  var newN = [];
-  for (var i = 0; i < n.length; i++) {
-    if (n[i].id !== id) {
-      newN.push(n[i]);
-    }
-  }
-  setItem(STORAGE_KEYS.NOTES, newN);
-  return newN;
-}
-
-export function updateNote(id, content) {
-  var n = getNotes();
-  for (var i = 0; i < n.length; i++) {
-    if (n[i].id === id) {
-      n[i].content = content;
-      n[i].updatedAt = new Date().toISOString();
-    }
-  }
-  setItem(STORAGE_KEYS.NOTES, n);
-  return n;
-}
-
-// Reading Progress
-export function getReadingProgress() {
-  return getItem(STORAGE_KEYS.READING_PROGRESS, null);
-}
-
-export function saveReadingProgress(bookId, chapter) {
-  var p = { bookId: bookId, chapter: chapter, timestamp: new Date().toISOString() };
-  setItem(STORAGE_KEYS.READING_PROGRESS, p);
-  return p;
-}
-
-// Settings
-export function getSettings() {
-  return getItem(STORAGE_KEYS.SETTINGS, {
-    theme: 'light',
-    fontSize: 16,
-    lineHeight: 1.8,
-    maxWidth: '65ch',
-    showVerseNumbers: true
+  var filteredBooks = BOOKS.filter(function(book) {
+    var matchesTestament = testament === 'all' || book.testament === testament;
+    var matchesSearch = book.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+    return matchesTestament && matchesSearch;
   });
-}
 
-export function saveSettings(s) {
-  setItem(STORAGE_KEYS.SETTINGS, s);
-}
+  var oldBooks = filteredBooks.filter(function(b) { return b.testament === 'old'; });
+  var newBooks = filteredBooks.filter(function(b) { return b.testament === 'new'; });
 
-// Recent Searches
-export function getRecentSearches() {
-  return getItem(STORAGE_KEYS.RECENT_SEARCHES, []);
-}
+  return (
+    <div className="bg-card rounded-2xl shadow-xl border border-border overflow-hidden">
+      <div className="p-4 border-b border-border flex items-center gap-3">
+        <div className="flex-1 relative">
+          <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={function(e) { setSearchQuery(e.target.value); }}
+            placeholder="Search books..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+          />
+        </div>
+        {onClose && (
+          <button onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors">
+            <X size={20} />
+          </button>
+        )}
+      </div>
 
-export function addRecentSearch(q) {
-  var s = getRecentSearches();
-  var newS = [];
-  for (var i = 0; i < s.length; i++) {
-    if (s[i].toLowerCase() !== q.toLowerCase()) {
-      newS.push(s[i]);
-    }
-  }
-  newS.unshift(q);
-  if (newS.length > 10) newS = newS.slice(0, 10);
-  setItem(STORAGE_KEYS.RECENT_SEARCHES, newS);
-  return newS;
-}
+      <div className="flex border-b border-border">
+        {[
+          { value: 'all', label: 'All Books' },
+          { value: 'old', label: 'Old Testament' },
+          { value: 'new', label: 'New Testament' },
+        ].map(function(item) {
+          var value = item.value;
+          var label = item.label;
+          return (
+            <button
+              key={value}
+              onClick={function() { setTestament(value); }}
+              className={'flex-1 px-4 py-2.5 text-sm font-medium transition-colors ' + (testament === value ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-500' : 'text-muted-foreground hover:text-foreground')}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
 
-export function clearRecentSearches() {
-  localStorage.removeItem(STORAGE_KEYS.RECENT_SEARCHES);
+      <div className="max-h-[420px] overflow-y-auto p-4 space-y-4">
+        {testament !== 'new' && oldBooks.length > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              Old Testament
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {oldBooks.map(function(book) {
+                return (
+                  <Link
+                    key={book.id}
+                    to={'/bible/' + book.id + '/1'}
+                    onClick={onClose}
+                    className={'px-3 py-2 rounded-lg text-sm text-center transition-all ' + (book.id === currentBookId ? 'bg-primary-500 text-white' : 'hover:bg-muted')}
+                  >
+                    {book.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {testament !== 'old' && newBooks.length > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+              New Testament
+            </h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {newBooks.map(function(book) {
+                return (
+                  <Link
+                    key={book.id}
+                    to={'/bible/' + book.id + '/1'}
+                    onClick={onClose}
+                    className={'px-3 py-2 rounded-lg text-sm text-center transition-all ' + (book.id === currentBookId ? 'bg-primary-500 text-white' : 'hover:bg-muted')}
+                  >
+                    {book.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {filteredBooks.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No books found
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
