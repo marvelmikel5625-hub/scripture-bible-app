@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, ChevronRight, Bookmark, StickyNote, Copy, Share2, X, BookOpen,
-  Shuffle, Volume2, VolumeX, RotateCcw
+  Shuffle, Volume2, VolumeX
 } from 'lucide-react';
 import { BOOKS } from '../data/books';
 import { getKJVChapter } from '../data/bibleLoader';
@@ -125,26 +125,31 @@ export default function Bible() {
   };
 
   const handleCopy = (verse) => {
-    navigator.clipboard.writeText(`${verse.text} — ${book.name} ${currentChapter}:${verse.verse} (KJV)`);
+    const text = verse.text + ' — ' + book.name + ' ' + currentChapter + ':' + verse.verse + ' (KJV)';
+    navigator.clipboard.writeText(text);
     setShowContext(false);
   };
 
   const handleShare = async (verse) => {
-    const text = `${verse.text} — ${book.name} ${currentChapter}:${verse.verse} (KJV)`;
-    try { await navigator.share({ text }); } catch { handleCopy(verse); }
+    const text = verse.text + ' — ' + book.name + ' ' + currentChapter + ':' + verse.verse + ' (KJV)';
+    try { 
+      await navigator.share({ text }); 
+    } catch { 
+      handleCopy(verse); 
+    }
     setShowContext(false);
   };
 
   const goToChapter = (c) => {
     if (c >= 1 && c <= book.chapters) {
-      window.location.href = `/bible/${book.id}/${c}`;
+      window.location.href = '/bible/' + book.id + '/' + c;
     }
   };
 
   const randomVerse = () => {
     const randomBook = BOOKS[Math.floor(Math.random() * BOOKS.length)];
     const randomChapter = Math.floor(Math.random() * randomBook.chapters) + 1;
-    window.location.href = `/bible/${randomBook.id}/${randomChapter}`;
+    window.location.href = '/bible/' + randomBook.id + '/' + randomChapter;
   };
 
   const readAloud = () => {
@@ -158,21 +163,20 @@ export default function Bible() {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
     utterance.pitch = 1;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = function() { setIsSpeaking(false); };
+    utterance.onerror = function() { setIsSpeaking(false); };
     speechSynth.speak(utterance);
     setIsSpeaking(true);
   };
 
   const shareChapter = () => {
-    const chapterText = verses.map(v => `${v.verse} ${v.text}`).join('\n');
-    const shareText = `${book.name} ${currentChapter}\n\n${chapterText}\n\n— King James Version (KJV)`;
+    const chapterText = verses.map(v => v.verse + ' ' + v.text).join('\n');
+    const shareText = book.name + ' ' + currentChapter + '\n\n' + chapterText + '\n\n— King James Version (KJV)';
     navigator.clipboard.writeText(shareText);
-    // Show feedback
     const btn = document.getElementById('shareChapterBtn');
     if (btn) {
       btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = 'Share Chapter'; }, 2000);
+      setTimeout(function() { btn.textContent = 'Share Chapter'; }, 2000);
     }
   };
 
@@ -200,9 +204,7 @@ export default function Bible() {
             </button>
             <button
               onClick={readAloud}
-              className={`p-2 rounded-lg border transition-colors ${
-                isSpeaking ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-500' : 'border-border hover:bg-muted'
-              }`}
+              className={'p-2 rounded-lg border transition-colors ' + (isSpeaking ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-500' : 'border-border hover:bg-muted')}
               title={isSpeaking ? 'Stop Reading' : 'Read Aloud'}
             >
               {isSpeaking ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -236,7 +238,7 @@ export default function Bible() {
           <div className="w-full bg-muted rounded-full h-2">
             <div 
               className="bg-primary-500 h-2 rounded-full transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
+              style={{ width: progressPercentage + '%' }}
             />
           </div>
         </div>
@@ -252,17 +254,17 @@ export default function Bible() {
       </div>
 
       <div className="mb-6 flex flex-wrap gap-1.5">
-        {Array.from({ length: Math.min(book.chapters, 30) }, (_, i) => i + 1).map(n => (
-          <button 
-            key={n} 
-            onClick={() => goToChapter(n)} 
-            className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
-              n === currentChapter ? 'bg-primary-500 text-white' : 'hover:bg-muted'
-            }`}
-          >
-            {n}
-          </button>
-        ))}
+        {Array.from({ length: Math.min(book.chapters, 30) }, (_, i) => i + 1).map(function(n) {
+          return (
+            <button 
+              key={n} 
+              onClick={() => goToChapter(n)} 
+              className={'w-9 h-9 rounded-lg text-sm font-medium transition-colors ' + (n === currentChapter ? 'bg-primary-500 text-white' : 'hover:bg-muted')}
+            >
+              {n}
+            </button>
+          );
+        })}
         {book.chapters > 30 && (
           <button 
             onClick={() => setShowBookSelector(true)} 
@@ -277,17 +279,15 @@ export default function Bible() {
         className="font-serif space-y-1"
         style={{ fontSize: settings.fontSize, lineHeight: settings.lineHeight, maxWidth: settings.maxWidth }}
       >
-        {verses.map(v => {
-          const marked = bookmarks.some(b => b.bookId === book.id && b.chapter === currentChapter && b.verse === v.verse);
+        {verses.map(function(v) {
+          const marked = bookmarks.some(function(b) { return b.bookId === book.id && b.chapter === currentChapter && b.verse === v.verse; });
           const isHighlighted = highlightedVerse === v.verse;
           
           return (
             <div 
               key={v.verse} 
-              className={`verse-item relative py-1.5 px-4 -mx-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors ${
-                isHighlighted ? 'bg-yellow-100 dark:bg-yellow-900/30' : ''
-              }`}
-              onClick={e => handleVerseClick(v, e)}
+              className={'verse-item relative py-1.5 px-4 -mx-4 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors ' + (isHighlighted ? 'bg-yellow-100 dark:bg-yellow-900/30' : '')}
+              onClick={function(e) { handleVerseClick(v, e); }}
             >
               <div className="flex items-start gap-3">
                 {settings.showVerseNumbers && (
@@ -378,7 +378,7 @@ export default function Bible() {
               </div>
               <textarea 
                 value={noteContent} 
-                onChange={e => setNoteContent(e.target.value)} 
+                onChange={function(e) { setNoteContent(e.target.value); }} 
                 placeholder="Write your note here..." 
                 className="w-full min-h-[120px] p-3 rounded-lg border border-border bg-background resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
