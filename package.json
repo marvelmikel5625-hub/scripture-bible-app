@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "kjv-bible": "^1.0.0",
+    "bible-kjv": "^1.0.0",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
