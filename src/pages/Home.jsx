@@ -1,32 +1,23 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { BookOpen, Search, Bookmark, StickyNote, Copy, Share2, TrendingUp, Calendar } from 'lucide-react';
+import { BookOpen, Search, Bookmark, StickyNote, Copy, Share2 } from 'lucide-react';
 import { getReadingProgress, getBookmarks, getNotes } from '../utils/storage';
 import { BOOKS } from '../data/books';
 
 export default function Home() {
-  const [progress, setProgress] = useState(null);
-  const [bookmarks, setBookmarks] = useState([]);
-  const [notes, setNotes] = useState([]);
-  const [dailyVerse, setDailyVerse] = useState(null);
-  const [stats, setStats] = useState({ versesRead: 0, booksStarted: 0 });
+  var [progress, setProgress] = useState(null);
+  var [bookmarks, setBookmarks] = useState([]);
+  var [notes, setNotes] = useState([]);
+  var [dailyVerse, setDailyVerse] = useState(null);
 
-  useEffect(() => {
+  useEffect(function() {
     setProgress(getReadingProgress());
     setBookmarks(getBookmarks());
     setNotes(getNotes());
 
-    // Calculate stats
-    const bookmarksCount = getBookmarks().length;
-    const notesCount = getNotes().length;
-    setStats({
-      versesRead: bookmarksCount,
-      booksStarted: notesCount,
-    });
-
-    const day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const idx = day % 5;
-    const verses = [
+    var day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    var idx = day % 5;
+    var verses = [
       { bookId: 19, bookName: 'Psalms', chapter: 23, verse: 4, text: 'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.' },
       { bookId: 43, bookName: 'John', chapter: 3, verse: 16, text: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.' },
       { bookId: 20, bookName: 'Proverbs', chapter: 3, verse: 5, text: 'Trust in the LORD with all thine heart; and lean not unto thine own understanding.' },
@@ -36,7 +27,7 @@ export default function Home() {
     setDailyVerse(verses[idx % verses.length]);
   }, []);
 
-  const popularBooks = [
+  var popularBooks = [
     { id: 1, name: 'Genesis', desc: 'The beginning of all things' },
     { id: 19, name: 'Psalms', desc: 'Songs of praise and prayer' },
     { id: 20, name: 'Proverbs', desc: 'Wisdom for daily living' },
@@ -46,9 +37,9 @@ export default function Home() {
     { id: 66, name: 'Revelation', desc: 'The final victory' },
   ];
 
-  const handleCopy = (text) => navigator.clipboard.writeText(text);
-  const handleShare = async (text) => {
-    try { await navigator.share({ text }); } catch { handleCopy(text); }
+  var handleCopy = function(text) { navigator.clipboard.writeText(text); };
+  var handleShare = async function(text) {
+    try { await navigator.share({ text: text }); } catch { handleCopy(text); }
   };
 
   return (
@@ -59,25 +50,6 @@ export default function Home() {
         <p className="text-xs text-muted-foreground mt-1">King James Version (KJV)</p>
       </section>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <Bookmark size={20} className="mx-auto text-primary-500 mb-1" />
-          <p className="text-xl font-semibold">{bookmarks.length}</p>
-          <p className="text-xs text-muted-foreground">Bookmarks</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <StickyNote size={20} className="mx-auto text-primary-500 mb-1" />
-          <p className="text-xl font-semibold">{notes.length}</p>
-          <p className="text-xs text-muted-foreground">Notes</p>
-        </div>
-        <div className="bg-card rounded-xl border border-border p-4 text-center">
-          <TrendingUp size={20} className="mx-auto text-primary-500 mb-1" />
-          <p className="text-xl font-semibold">{progress ? progress.chapter : 0}</p>
-          <p className="text-xs text-muted-foreground">Current Chapter</p>
-        </div>
-      </div>
-
       {dailyVerse && (
         <section className="mb-8">
           <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/10 rounded-2xl p-6 md:p-8 border border-primary-200 dark:border-primary-800/30">
@@ -87,9 +59,9 @@ export default function Home() {
             </div>
             <blockquote className="font-serif text-xl md:text-2xl leading-relaxed">"{dailyVerse.text}"</blockquote>
             <div className="flex items-center gap-2 mt-4">
-              <button onClick={() => handleCopy(`${dailyVerse.text} — ${dailyVerse.bookName} ${dailyVerse.chapter}:${dailyVerse.verse} (KJV)`)} className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors"><Copy size={18} /></button>
-              <button onClick={() => handleShare(`${dailyVerse.text} — ${dailyVerse.bookName} ${dailyVerse.chapter}:${dailyVerse.verse} (KJV)`)} className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors"><Share2 size={18} /></button>
-              <Link to={`/bible/${dailyVerse.bookId}/${dailyVerse.chapter}`} className="ml-auto text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">Read Full Chapter →</Link>
+              <button onClick={function() { handleCopy(dailyVerse.text + ' — ' + dailyVerse.bookName + ' ' + dailyVerse.chapter + ':' + dailyVerse.verse + ' (KJV)'); }} className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors"><Copy size={18} /></button>
+              <button onClick={function() { handleShare(dailyVerse.text + ' — ' + dailyVerse.bookName + ' ' + dailyVerse.chapter + ':' + dailyVerse.verse + ' (KJV)'); }} className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-black/20 transition-colors"><Share2 size={18} /></button>
+              <Link to={'/bible/' + dailyVerse.bookId + '/' + dailyVerse.chapter} className="ml-auto text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">Read Full Chapter →</Link>
             </div>
           </div>
         </section>
@@ -101,10 +73,10 @@ export default function Home() {
             <h2 className="text-sm font-medium text-muted-foreground mb-3">Continue Reading</h2>
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-serif text-lg font-semibold">{BOOKS.find(b => b.id === progress.bookId)?.name || 'Unknown'}</p>
+                <p className="font-serif text-lg font-semibold">{BOOKS.find(function(b) { return b.id === progress.bookId; })?.name || 'Unknown'}</p>
                 <p className="text-sm text-muted-foreground">Chapter {progress.chapter}</p>
               </div>
-              <Link to={`/bible/${progress.bookId}/${progress.chapter}`} className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium hover:underline">Continue reading →</Link>
+              <Link to={'/bible/' + progress.bookId + '/' + progress.chapter} className="flex items-center gap-1 text-primary-600 dark:text-primary-400 font-medium hover:underline">Continue reading →</Link>
             </div>
           </div>
         </section>
@@ -115,26 +87,33 @@ export default function Home() {
           {[
             { icon: BookOpen, label: 'Read Bible', path: '/bible' },
             { icon: Search, label: 'Search', path: '/search' },
-            { icon: Bookmark, label: `Bookmarks (${bookmarks.length})`, path: '/bookmarks' },
-            { icon: StickyNote, label: `Notes (${notes.length})`, path: '/notes' },
-          ].map(({ icon: Icon, label, path }) => (
-            <Link key={path} to={path} className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border border-border hover:border-primary-300 hover:shadow-md transition-all">
-              <Icon size={24} className="text-primary-500" />
-              <span className="text-sm font-medium text-center">{label}</span>
-            </Link>
-          ))}
+            { icon: Bookmark, label: 'Bookmarks (' + bookmarks.length + ')', path: '/bookmarks' },
+            { icon: StickyNote, label: 'Notes (' + notes.length + ')', path: '/notes' },
+          ].map(function(item) {
+            var Icon = item.icon;
+            var label = item.label;
+            var path = item.path;
+            return (
+              <Link key={path} to={path} className="flex flex-col items-center gap-2 p-4 bg-card rounded-xl border border-border hover:border-primary-300 hover:shadow-md transition-all">
+                <Icon size={24} className="text-primary-500" />
+                <span className="text-sm font-medium text-center">{label}</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
       <section>
         <h2 className="text-lg font-semibold mb-4">Popular Books</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {popularBooks.map((book) => (
-            <Link key={book.id} to={`/bible/${book.id}/1`} className="p-4 bg-card rounded-xl border border-border hover:border-primary-300 hover:shadow-md transition-all group">
-              <h3 className="font-serif font-semibold group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{book.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">{book.desc}</p>
-            </Link>
-          ))}
+          {popularBooks.map(function(book) {
+            return (
+              <Link key={book.id} to={'/bible/' + book.id + '/1'} className="p-4 bg-card rounded-xl border border-border hover:border-primary-300 hover:shadow-md transition-all group">
+                <h3 className="font-serif font-semibold group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{book.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{book.desc}</p>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>
