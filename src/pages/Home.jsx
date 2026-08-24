@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { BookOpen, Search, Bookmark, StickyNote, Copy, Share2 } from 'lucide-react';
+import { BookOpen, Search, Bookmark, StickyNote, Copy, Share2, TrendingUp, Calendar } from 'lucide-react';
 import { getReadingProgress, getBookmarks, getNotes } from '../utils/storage';
 import { BOOKS } from '../data/books';
 
@@ -9,11 +9,20 @@ export default function Home() {
   const [bookmarks, setBookmarks] = useState([]);
   const [notes, setNotes] = useState([]);
   const [dailyVerse, setDailyVerse] = useState(null);
+  const [stats, setStats] = useState({ versesRead: 0, booksStarted: 0 });
 
   useEffect(() => {
     setProgress(getReadingProgress());
     setBookmarks(getBookmarks());
     setNotes(getNotes());
+
+    // Calculate stats
+    const bookmarksCount = getBookmarks().length;
+    const notesCount = getNotes().length;
+    setStats({
+      versesRead: bookmarksCount,
+      booksStarted: notesCount,
+    });
 
     const day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     const idx = day % 5;
@@ -49,6 +58,25 @@ export default function Home() {
         <p className="text-muted-foreground mt-1">Continue your journey through Scripture.</p>
         <p className="text-xs text-muted-foreground mt-1">King James Version (KJV)</p>
       </section>
+
+      {/* Stats Row */}
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        <div className="bg-card rounded-xl border border-border p-4 text-center">
+          <Bookmark size={20} className="mx-auto text-primary-500 mb-1" />
+          <p className="text-xl font-semibold">{bookmarks.length}</p>
+          <p className="text-xs text-muted-foreground">Bookmarks</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4 text-center">
+          <StickyNote size={20} className="mx-auto text-primary-500 mb-1" />
+          <p className="text-xl font-semibold">{notes.length}</p>
+          <p className="text-xs text-muted-foreground">Notes</p>
+        </div>
+        <div className="bg-card rounded-xl border border-border p-4 text-center">
+          <TrendingUp size={20} className="mx-auto text-primary-500 mb-1" />
+          <p className="text-xl font-semibold">{progress ? progress.chapter : 0}</p>
+          <p className="text-xs text-muted-foreground">Current Chapter</p>
+        </div>
+      </div>
 
       {dailyVerse && (
         <section className="mb-8">
