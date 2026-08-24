@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom';
 import { addBookmark, removeBookmark, isBookmarked } from '../utils/storage';
 
 export default function DailyVerse() {
-  const [verse, setVerse] = useState(null);
-  const [bookmarked, setBookmarked] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const speechSynth = window.speechSynthesis;
+  var [verse, setVerse] = useState(null);
+  var [bookmarked, setBookmarked] = useState(false);
+  var [isSpeaking, setIsSpeaking] = useState(false);
+  var speechSynth = window.speechSynthesis;
 
-  useEffect(() => {
-    const day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    const idx = day % 5;
-    const verses = [
+  useEffect(function() {
+    var day = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    var idx = day % 5;
+    var verses = [
       { 
         bookId: 19, bookName: 'Psalms', chapter: 23, verse: 4, 
         text: 'Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.',
@@ -39,28 +39,28 @@ export default function DailyVerse() {
         context: 'God works in all circumstances for the ultimate good of those who love him.' 
       },
     ];
-    const v = verses[idx % verses.length];
+    var v = verses[idx % verses.length];
     setVerse(v);
     setBookmarked(isBookmarked(v.bookId, v.chapter, v.verse));
   }, []);
 
-  const handleCopy = () => {
+  var handleCopy = function() {
     if (!verse) return;
-    navigator.clipboard.writeText(`${verse.text} — ${verse.bookName} ${verse.chapter}:${verse.verse} (KJV)`);
+    var text = verse.text + ' — ' + verse.bookName + ' ' + verse.chapter + ':' + verse.verse + ' (KJV)';
+    navigator.clipboard.writeText(text);
   };
 
-  const handleShare = async () => {
+  var handleShare = async function() {
     if (!verse) return;
+    var text = verse.text + ' — ' + verse.bookName + ' ' + verse.chapter + ':' + verse.verse + ' (KJV)';
     try { 
-      await navigator.share({ 
-        text: `${verse.text} — ${verse.bookName} ${verse.chapter}:${verse.verse} (KJV)` 
-      }); 
+      await navigator.share({ text: text }); 
     } catch { 
       handleCopy(); 
     }
   };
 
-  const handleBookmark = () => {
+  var handleBookmark = function() {
     if (!verse) return;
     if (bookmarked) {
       removeBookmark(verse.bookId, verse.chapter, verse.verse);
@@ -77,7 +77,7 @@ export default function DailyVerse() {
     }
   };
 
-  const readAloud = () => {
+  var readAloud = function() {
     if (!verse) return;
     if (isSpeaking) {
       speechSynth.cancel();
@@ -85,11 +85,11 @@ export default function DailyVerse() {
       return;
     }
     
-    const utterance = new SpeechSynthesisUtterance(verse.text);
+    var utterance = new SpeechSynthesisUtterance(verse.text);
     utterance.rate = 0.85;
     utterance.pitch = 1;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = function() { setIsSpeaking(false); };
+    utterance.onerror = function() { setIsSpeaking(false); };
     speechSynth.speak(utterance);
     setIsSpeaking(true);
   };
@@ -138,22 +138,14 @@ export default function DailyVerse() {
           </button>
           <button 
             onClick={readAloud} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              isSpeaking 
-                ? 'bg-primary-500 text-white hover:bg-primary-600' 
-                : 'bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30'
-            }`}
+            className={'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ' + (isSpeaking ? 'bg-primary-500 text-white hover:bg-primary-600' : 'bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30')}
           >
             {isSpeaking ? <VolumeX size={18} /> : <Volume2 size={18} />}
             <span>{isSpeaking ? 'Stop' : 'Listen'}</span>
           </button>
           <button 
             onClick={handleBookmark} 
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              bookmarked 
-                ? 'bg-primary-500 text-white hover:bg-primary-600' 
-                : 'bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30'
-            }`}
+            className={'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ' + (bookmarked ? 'bg-primary-500 text-white hover:bg-primary-600' : 'bg-white/50 dark:bg-black/20 hover:bg-white/70 dark:hover:bg-black/30')}
           >
             <Bookmark size={18} fill={bookmarked ? 'currentColor' : 'none'} />
             <span>{bookmarked ? 'Bookmarked' : 'Bookmark'}</span>
@@ -170,7 +162,7 @@ export default function DailyVerse() {
       
       <div className="mt-8 text-center">
         <Link 
-          to={`/bible/${verse.bookId}/${verse.chapter}`} 
+          to={'/bible/' + verse.bookId + '/' + verse.chapter} 
           className="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-medium hover:underline"
         >
           Read Full Chapter <ArrowRight size={16} />
