@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search as SearchIcon, X, Clock, ArrowRight } from 'lucide-react';
+import { Search as SearchIcon, X, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
 import { BOOKS } from '../data/books';
 import { getRecentSearches, addRecentSearch, clearRecentSearches } from '../utils/storage';
-import * as bibleKJV from 'bible-kjv';
-
-// Normalize import shape: package may export default or named
-const kjv = (bibleKJV && (bibleKJV.default || bibleKJV)) || {};
+import kjv from 'bible-kjv';
 
 // Map book IDs to names
 const bookNameMap = {
@@ -39,6 +36,8 @@ export default function Search() {
   const [isSearching, setIsSearching] = useState(false);
   const [recentSearches, setRecentSearches] = useState([]);
   const [allVerses, setAllVerses] = useState([]);
+  const [loadingError, setLoadingError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load all verses once when component mounts
   useEffect(() => {
@@ -46,29 +45,86 @@ export default function Search() {
     
     // Build complete verse index
     const verses = [];
+    let errorOccurred = false;
+    
     try {
+      // Check if kjv data exists
+      if (!kjv || typeof kjv !== 'object') {
+        throw new Error('Bible data is not available. Please check your connection.');
+      }
+
+      const bookKeys = Object.keys(kjv);
+      if (bookKeys.length === 0) {
+        throw new Error('No Bible books found in the data.');
+      }
+
       Object.entries(kjv).forEach(([bookName, book]) => {
+        // Skip if book data is invalid
+        if (!book || typeof book !== 'object') {
+          console.warn(`Skipping invalid book: ${bookName}`);
+          return;
+        }
+
         Object.entries(book).forEach(([chapter, chapterData]) => {
+          // Skip if chapter data is invalid
+          if (!chapterData || typeof chapterData !== 'object') {
+            console.warn(`Skipping invalid chapter ${chapter} in ${bookName}`);
+            return;
+          }
+
           Object.entries(chapterData).forEach(([verse, text]) => {
+            // Skip if verse text is invalid
+            if (!text || typeof text !== 'string') {
+              console.warn(`Skipping invalid verse ${verse} in ${bookName} ${chapter}`);
+              return;
+            }
+
+            const bookId = bookIdMap[bookName];
+            if (!bookId) {
+              console.warn(`Unknown book: ${bookName}`);
+              return;
+            }
+
             verses.push({
               bookName,
               chapter: parseInt(chapter),
               verse: parseInt(verse),
-              text,
-              bookId: bookIdMap[bookName] || 0
+              text: text.trim(),
+              bookId: bookId
             });
           });
         });
       });
+
+      if (verses.length === 0) {
+        throw new Error('No verses were loaded. The Bible data may be empty.');
+      }
+
+      setAllVerses(verses);
+      setLoadingError(null);
     } catch (error) {
       console.error('Error loading KJV data:', error);
+      errorOccurred = true;
+      setLoadingError(error.message || 'Failed to load Bible data. Please try again later.');
+      setAllVerses([]);
+    } finally {
+      setIsLoading(false);
     }
-    setAllVerses(verses);
+
+    // Cleanup function
+    return () => {
+      // No cleanup needed
+    };
   }, []);
 
   const handleSearch = (searchQuery) => {
     if (!searchQuery.trim()) {
       setResults([]);
+      return;
+    }
+
+    if (loadingError) {
+      // Don't search if there was an error loading data
       return;
     }
 
@@ -101,11 +157,16 @@ export default function Search() {
       return;
     }
 
-    // Regular search
+    // Regular search - search in verses
     const searchResults = allVerses.filter(verse => {
-      const textMatch = verse.text.toLowerCase().includes(q);
-      const bookMatch = verse.bookName.toLowerCase().includes(q);
-      return textMatch || bookMatch;
+      try {
+        const textMatch = verse.text.toLowerCase().includes(q);
+        const bookMatch = verse.bookName.toLowerCase().includes(q);
+        return textMatch || bookMatch;
+      } catch (err) {
+        console.warn('Error searching verse:', err);
+        return false;
+      }
     });
 
     setResults(searchResults.slice(0, 50));
@@ -118,14 +179,52 @@ export default function Search() {
   };
 
   const highlightText = (text, query) => {
-    if (!query.trim()) return text;
-    const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'gi'));
-    return parts.map((part, i) => 
-      part.toLowerCase() === query.toLowerCase() ? 
-        <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 px-0.5 rounded">{part}</span> : 
-        part
-    );
+    if (!query.trim() || !text) return text;
+    try {
+      const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+      return parts.map((part, i) => 
+        part.toLowerCase() === query.toLowerCase() ? 
+          <span key={i} className="bg-yellow-200 dark:bg-yellow-900/50 px-0.5 rounded">{part}</span> : 
+          part
+      );
+    } catch (error) {
+      console.warn('Error highlighting text:', error);
+      return text;
+    }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-6">Search Scripture</h1>
+        <div className="text-center py-12">
+          <div className="animate-spin w-8 h-8 border-4 border-primary-200 border-t-primary-500 rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading Bible data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (loadingError) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-2xl md:text-3xl font-serif font-semibold mb-6">Search Scripture</h1>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 rounded-xl p-6 text-center">
+          <AlertTriangle size={48} className="mx-auto text-red-500 mb-4" />
+          <h3 className="text-xl font-semibold text-red-700 dark:text-red-400 mb-2">Error Loading Bible Data</h3>
+          <p className="text-red-600 dark:text-red-300 mb-4">{loadingError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -141,6 +240,7 @@ export default function Search() {
             placeholder="Search for verses... e.g., 'love', 'John 3:16'"
             className="flex-1 px-3 py-3 bg-transparent outline-none"
             onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(query); }}
+            disabled={!!loadingError}
           />
           {query && (
             <button 
@@ -152,13 +252,16 @@ export default function Search() {
           )}
           <button 
             onClick={() => handleSearch(query)} 
-            className="px-4 py-2 mr-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+            className="px-4 py-2 mr-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!!loadingError || allVerses.length === 0}
           >
             Search
           </button>
         </div>
         <p className="text-xs text-muted-foreground mt-2">
-          Search all {allVerses.length.toLocaleString()} verses • Try "John 3:16" for exact verse
+          {allVerses.length > 0 
+            ? `Search all ${allVerses.length.toLocaleString()} verses • Try "John 3:16" for exact verse`
+            : 'Loading Bible data...'}
         </p>
       </div>
 
